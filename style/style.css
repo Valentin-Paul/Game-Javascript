@@ -1,0 +1,25 @@
+
+#game{
+    position: relative;
+    background-color: gray;
+    width: 100vw;
+    height: 100vh;
+}
+.obstacle {
+    position: absolute;
+    background-color: black;
+}
+
+#player {
+    position: absolute;
+    background-color: black;
+    left: 50%;
+    bottom: 0%;
+    width: 0.5vw;
+    height: 15vh;
+}
+
+.bullet {
+    position: absolute;
+    background-color: black;
+}
