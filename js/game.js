@@ -11,7 +11,15 @@ class Main {
     this.obstacle = null;
     this.bullets = [];
     this.shooter = null;
-  }
+    this.obstacles = [];
+    this.bulletInterval;
+    this.wall = null; 
+    this.moveObstacleRight = ()=>{this.xAxis += 0.5};
+    this.moveObstacleLeft = ()=>{this.xAxis -= 0.5};
+    this.counter = 8;
+    this.gameover = false;
+    }
+  
 
   creating(className) {
     let game = document.getElementById("game");
@@ -28,30 +36,47 @@ class Main {
     e.element.style.height = `${e.height}%`;
   }
 
+  removing(arr, el){
+        if (el.yAxis >= 100) {
+          arr.pop();
+          el.element.remove();
+        }
+     
+  }
  
 
   startGame() {
+
+    /// counter ///
+    setInterval(()=>{
+     document.getElementById('counter').innerHTML = `Shots: ${this.counter}`;
+    },100)
+    
+
     /// obstacle ///
     this.obstacle = new Obstacle();
     this.obstacle.element = this.creating("obstacle");
     this.displaying(this.obstacle);
+    this.obstacles.push(this.obstacle);
 
     setInterval(() => {
-      if (Math.round(this.obstacle.xAxis * 100) / 100 === 0) {
-        this.obstacle.wall = "left";
-      } else if (
-        Math.round((this.obstacle.xAxis + this.obstacle.width) * 100) / 100 === 100.0) {
-        this.obstacle.wall = "right";
-      }
+    this.obstacles.forEach((obstacle) => {
+        if (obstacle.xAxis  === 0){
+            obstacle.wall = 'left'
+        }
+        else if((obstacle.xAxis + obstacle.width) === 100){
+            obstacle.wall = "right";
+        }
+    
+          if (obstacle.wall === "left") {
+            obstacle.moveObstacleRight();
+          } else if (obstacle.wall === "right") {
+            obstacle.moveObstacleLeft();
+          }
+          this.displaying(obstacle);
+    })
 
-      if (this.obstacle.wall === "left") {
-        this.obstacle.moveObstacleRight();
-      } else if (this.obstacle.wall === "right") {
-        this.obstacle.moveObstacleLeft();
-      }
-      this.displaying(this.obstacle);
-
-    }, 20);
+    }, 50);
   } /// end start game ///
 
   intersectRect(shot) {
@@ -59,68 +84,51 @@ class Main {
       this.obstacle.xAxis + this.obstacle.width > shot.xAxis && 
       this.obstacle.yAxis + this.obstacle.height > shot.yAxis &&
       this.obstacle.yAxis < shot.yAxis + shot.height){
-        console.log('game over');
-        console.log(shot);
-        // this.obstacles.push(shot);
-
+        shot.wall = this.obstacle.wall;
+        this.obstacles.push(shot);
+        console.log(this.obstacles);
+        return true;
          }
  } 
- 
 
   /// intervall for the shot ///
   shootBullet(element) {
-    if (element === "shoot") {
+    if (element === "shoot" && this.counter > 0) {
+        this. counter--;
       this.shooter = new Shooter();
       this.shooter.element = this.creating("bullet");
       this.displaying(this.shooter);
       this.bullets.push(this.shooter);
+       
+    }; 
 
-      setInterval(() => {
+    this.bulletInterval = setInterval(()=>{
         this.bullets.forEach((bullet) => {
-          bullet.shoot();
-          this.displaying(bullet);
-          this.intersectRect(bullet);
-         
+        this.intersectRect(bullet);
+          if(this.intersectRect(bullet) === true){
+              this.bullets.shift();
+          }
+          else if(this.gameover === true){
+            console.log('moin');
+              this.bullets.shift();
+          }
+          else{
+            bullet.shoot();
+            this.displaying(bullet);
+          }
         });
-      }, 50);
-    }
-
+      }, 50)
   }
+  
 
-
- 
-
-//   detectColission() {
-//       setInterval(()=>{
-//           console.log(this.bullet.yAxis);
-//         if (
-//             this.shooter.xAxis < this.obstacle.xAxis + this.obstacle.width &&
-//             this.shooter.xAxis + this.shooter.width > this.obstacle.xAxis &&
-//             this.shooter.yAxis < this.obstacle.yAxis + this.obstacle.height &&
-//             this.shooter.height + this.shooter.yAxis > this.obstacle.yAxis
-//           ) {
-//             console.log("game over");
-//           }
-//       },50)
-    
-//   }
-}
-
+} /// end class Main ///
+console.log(this.stopBullet);
 ///// Obstacle-Clas //////
 class Obstacle extends Main{
     constructor(){
-        super('obstacle', 0, 75, 15, 5,)
+        super('obstacle', 0, 75, 15, 3,)
         this.wall = null;
     }
-   
-    moveObstacleRight(){
-        this.xAxis += 0.2;
-    }
-
-    moveObstacleLeft(){
-        this.xAxis -= 0.2;
-    }
-    
 }
 
 //// Shooter-Class/////
@@ -132,19 +140,20 @@ class Shooter extends Main{
     }
 
     shoot(){
-        if(Math.round(this.yAxis * 100) / 100 < 100){
-            this.yAxis += 0.3;
+        if(Math.round(this.yAxis * 100) / 100 <= 100){
+            console.log(this.yAxis);
+            this.yAxis += 0.5;
         }
-    }
-   
-
+        else if(Math.round(this.yAxis * 100) / 100 >= 100 ){
+            this.gameover = true;
+            alert('game over')
+        }    
+    }  
 }
 
 
 
-
-
-
+///// start game /////
 const play = new Main();
 play.startGame();
 
@@ -155,16 +164,36 @@ document.addEventListener("keydown",(event)=>{
     }
 });
 
+/// counter ///
+
+// game.appendChild(counter);
 
 
 
-///// storage ////
 
-  // if (
-        //     this.shooter.xAxis + this.shooter.width > this.obstacle.xAxis + this.obstacle.width&&
-        //     this.shooter.yAxis < this.obstacle.yAxis + this.obstacle.height &&
-        //     this.shooter.height + this.shooter.yAxis > this.obstacle.yAxis &&
-        //     this.shooter.xAxis < this.obstacle.xAxis + this.obstacle.width 
-        //   ) {
-        //     console.log("game over");
-        //   }
+//// storage ////
+// setInterval(() => {
+// if (this.obstacle.xAxis  === 0){
+//     this.obstacle.wall = 'left'
+// }
+// else if((this.obstacle.xAxis + this.obstacle.width) === 100){
+//     this.obstacle.wall = "right";
+// }
+
+//   if (this.obstacle.wall === "left") {
+//     this.obstacle.moveObstacleRight();
+//   } else if (this.obstacle.wall === "right") {
+//     this.obstacle.moveObstacleLeft();
+//   }
+//   this.displaying(this.obstacle);
+
+// }, 50);
+
+
+//// rounded ////
+  //   if (Math.round(this.obstacle.xAxis * 100) / 100 === 0) {
+    //     this.obstacle.wall = "left";
+    //   } else if (
+    //     Math.round((this.obstacle.xAxis + this.obstacle.width) * 100) / 100 === 100.0) {
+    //     this.obstacle.wall = "right";
+    //   }
