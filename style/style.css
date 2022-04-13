@@ -59,7 +59,11 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.stickedBullet {
+.stickyBullet {
     position: absolute;
     background-color: black;
+    left: 30.5%;
+    bottom: 0%;
+    width: 15%;
+    height: 15%;
 }
