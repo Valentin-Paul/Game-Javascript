@@ -86,20 +86,18 @@ class Main {
       this.obstacle.yAxis < shot.yAxis + shot.height){
         shot.wall = this.obstacle.wall;
         this.obstacles.push(shot);
-        console.log(this.obstacles);
         return true;
          }
  } 
 
   /// intervall for the shot ///
   shootBullet(element) {
-    if (element === "shoot" && this.counter > 0) {
-        this. counter--;
+    if (element === "shoot" && this.counter > 0 && this.bullets.length === 0 ) {
+      this. counter--;
       this.shooter = new Shooter();
       this.shooter.element = this.creating("bullet");
       this.displaying(this.shooter);
       this.bullets.push(this.shooter);
-       
     }; 
 
     this.bulletInterval = setInterval(()=>{
@@ -108,9 +106,9 @@ class Main {
           if(this.intersectRect(bullet) === true){
               this.bullets.shift();
           }
-          else if(this.gameover === true){
-            console.log('moin');
-              this.bullets.shift();
+          else if(bullet.yAxis === 100){
+            this.removing(this.bullets,bullet)
+            document.getElementById('gameover').innerHTML = `game over`;
           }
           else{
             bullet.shoot();
@@ -122,11 +120,11 @@ class Main {
   
 
 } /// end class Main ///
-console.log(this.stopBullet);
+
 ///// Obstacle-Clas //////
 class Obstacle extends Main{
     constructor(){
-        super('obstacle', 0, 75, 15, 3,)
+        super('obstacle', 0, 75, 18, 2,)
         this.wall = null;
     }
 }
@@ -141,13 +139,8 @@ class Shooter extends Main{
 
     shoot(){
         if(Math.round(this.yAxis * 100) / 100 <= 100){
-            console.log(this.yAxis);
             this.yAxis += 0.5;
-        }
-        else if(Math.round(this.yAxis * 100) / 100 >= 100 ){
-            this.gameover = true;
-            alert('game over')
-        }    
+        }  
     }  
 }
 

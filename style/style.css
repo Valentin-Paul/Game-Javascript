@@ -13,15 +13,27 @@
 #player {
     position: absolute;
     background-color: black;
-    left: 50%;
+    left: 49.5%;
     bottom: 0%;
-    width: 0.5vw;
-    height: 15vh;
+    width: 1.5%;
+    height: 15%;
+}
+
+#circle{
+    position: absolute;
+    background-color: darkgray;
+    left: 49.5%;
+    bottom: 14.4%;
+    width: 1.5%;
+    height: 1%;
+    border-radius: 50%;
 }
 
 .bullet {
     position: absolute;
     background-color: black;
+    border-top-left-radius: 30%;
+    border-top-right-radius: 30%;
 }
 
 #counter {
@@ -36,8 +48,13 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
-class Counter extends Main{
-    constructor(){
-        super('counter', 5, 95, 5, 5)
-    }
+#gameover {
+    position: absolute;
+    left: 35%;
+    bottom: 45%;  
+    width: 30%;
+    height: 10vh;
+    font-size: 6vw;
+    font-weight: 500;
+    font-family: Arial, Helvetica, sans-serif;
 }
