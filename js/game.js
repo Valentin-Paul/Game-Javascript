@@ -9,17 +9,22 @@ class Main {
     this.element = null;
     this.e = e;
     this.obstacle = null;
-    this.bullets = [];
     this.shooter = null;
-    this.obstacles = [];
-    this.bulletInterval;
-    this.wall = null; 
-    this.moveObstacleRight = ()=>{this.xAxis += 0.5};
-    this.moveObstacleLeft = ()=>{this.xAxis -= 0.5};
+    this.wall = null;
+    this.moveObstacleRight = () => {
+      this.xAxis += 0.5;
+    };
+    this.moveObstacleLeft = () => {
+      this.xAxis -= 0.5;
+    };
     this.counter = 8;
     this.gameover = false;
-    }
-  
+    this.hit = false;
+    this.stickyPositionX = null;
+    this.stickyPositionY = null;
+    this.bullets = [];
+    
+  }
 
   creating(className) {
     let game = document.getElementById("game");
@@ -36,88 +41,106 @@ class Main {
     e.element.style.height = `${e.height}%`;
   }
 
-  removing(arr, el){
-        if (el.yAxis >= 100) {
-          arr.pop();
-          el.element.remove();
-        }
-     
+  removing(el) {
+      el.element.remove();
   }
- 
+
+  intersectRect(shot) {
+    if ( this.obstacle.xAxis < shot.xAxis + shot.width &&
+         this.obstacle.xAxis + this.obstacle.width > shot.xAxis &&
+         this.obstacle.yAxis + this.obstacle.height > shot.yAxis &&
+         this.obstacle.yAxis < shot.yAxis + shot.height ) {
+        this.stickyPositionX = shot.xAxis;
+        this.stickyPositionY = shot.yAxis
+        
+        // this.removing(shot);
+        // shot.xAxis = 0;
+        // shot.yAxis = 0;
+        console.log(this.stickyPositionX);
+        console.log(this.stickyPositionY);
+          
+        return this.stickyPositionX, this.stickyPositionY, true;
+    }
+  }
+
+
+  shooting(element) {    
+    setInterval(() => {
+            element.shoot();
+            this.displaying(element);
+         if(this.intersectRect(element)===true)
+             this.remove(element);
+    }, 30);  
+  }
+
+  shootBullet(element) {
+    if (element === "shoot" && this.counter > 0) {
+      this.counter--;
+      this.shooter = new Shooter();
+      this.shooter.element = this.creating("bullet");
+      this.shooting(this.shooter);
+    }
+  }
 
   startGame() {
-
-    /// counter ///
-    setInterval(()=>{
-     document.getElementById('counter').innerHTML = `Shots: ${this.counter}`;
-    },100)
-    
-
+   
     /// obstacle ///
     this.obstacle = new Obstacle();
     this.obstacle.element = this.creating("obstacle");
     this.displaying(this.obstacle);
-    this.obstacles.push(this.obstacle);
 
-    setInterval(() => {
-    this.obstacles.forEach((obstacle) => {
-        if (obstacle.xAxis  === 0){
-            obstacle.wall = 'left'
-        }
-        else if((obstacle.xAxis + obstacle.width) === 100){
-            obstacle.wall = "right";
-        }
     
-          if (obstacle.wall === "left") {
-            obstacle.moveObstacleRight();
-          } else if (obstacle.wall === "right") {
-            obstacle.moveObstacleLeft();
-          }
-          this.displaying(obstacle);
-    })
+    setInterval(() => {
+        /// counter ///
+    document.getElementById("counter").innerHTML = `Shots: ${this.counter}`;
 
-    }, 50);
+
+      if (this.obstacle.xAxis === 0) {
+        this.obstacle.wall = "left";
+      } else if (this.obstacle.xAxis + this.obstacle.width === 100) {
+        this.obstacle.wall = "right";
+      }
+      if (this.obstacle.wall === "left") {
+        this.obstacle.moveObstacleRight();
+      } else if (this.obstacle.wall === "right") {
+        this.obstacle.moveObstacleLeft();
+      }
+      this.displaying(this.obstacle);
+
+      if(this.intersectRect(this.shooter) === true){
+        
+          console.log('hit');
+          this.removing(this.shooter)
+      }
+      this.intersectRect(this.shooter)
+
+}, 30); 
+      
+    //   if(this.intersectRect(this.shooter) === true){ 
+    //       this.stickedBullet = new StickedBullet();
+    //       this.stickedBullet.element = this.creating("stickedBullet");
+    //         this.stickedBullet.xAxis = this.stickyPositionX;
+    //         this.stickedBullet.yAxis = this.stickyPositionY;
+            // this.removing(this.shooter);
+            // console.log('hello');
+            // this.hit = false;
+            // return this.hit;
+    //   }
+    //   this.displaying(this.stickedBullet);
+    //   this.stickToObstacle(this.stickedBullet, this.obstacle);
+    
   } /// end start game ///
 
-  intersectRect(shot) {
- if(  this.obstacle.xAxis < shot.xAxis + shot.width && 
-      this.obstacle.xAxis + this.obstacle.width > shot.xAxis && 
-      this.obstacle.yAxis + this.obstacle.height > shot.yAxis &&
-      this.obstacle.yAxis < shot.yAxis + shot.height){
-        shot.wall = this.obstacle.wall;
-        this.obstacles.push(shot);
-        return true;
-         }
- } 
+
+
+
+
+//   stickToObstacle(element1, element2){
+//     element1.xAxis = element2.xAxis + (element1.xAxis - element2.xAxis);
+//     element1.yAxis = element2.yAxis + (element1.yAxis - element2.yAxis);
+// }
 
   /// intervall for the shot ///
-  shootBullet(element) {
-    if (element === "shoot" && this.counter > 0 && this.bullets.length === 0 ) {
-      this. counter--;
-      this.shooter = new Shooter();
-      this.shooter.element = this.creating("bullet");
-      this.displaying(this.shooter);
-      this.bullets.push(this.shooter);
-    }; 
-
-    this.bulletInterval = setInterval(()=>{
-        this.bullets.forEach((bullet) => {
-        this.intersectRect(bullet);
-          if(this.intersectRect(bullet) === true){
-              this.bullets.shift();
-          }
-          else if(bullet.yAxis === 100){
-            this.removing(this.bullets,bullet)
-            document.getElementById('gameover').innerHTML = `game over`;
-          }
-          else{
-            bullet.shoot();
-            this.displaying(bullet);
-          }
-        });
-      }, 50)
-  }
-  
 
 } /// end class Main ///
 
@@ -133,15 +156,28 @@ class Obstacle extends Main{
 class Shooter extends Main{
     constructor(){
         super('shooter', 50, 0, 0.5, 15);
-        this.bullets = []
-    // this.shooter = null;
     }
 
     shoot(){
         if(Math.round(this.yAxis * 100) / 100 <= 100){
-            this.yAxis += 0.5;
+            this.yAxis += 1;
         }  
+        // else if(this.intersectRect(this.shooter)===true){
+        //     this.removing(this)
+        // }
+        // else{
+        //     this.removing(this)
+        // }
     }  
+}
+
+
+class StickedBullet extends Main{
+    constructor(xAxis, yAxis){
+        super('stickedBullet', xAxis, yAxis,0.5, 15)
+        this.xAxis = xAxis;
+        this.yAxis = yAxis;
+    }
 }
 
 
@@ -156,11 +192,6 @@ document.addEventListener("keydown",(event)=>{
         play.shootBullet('shoot');
     }
 });
-
-/// counter ///
-
-// game.appendChild(counter);
-
 
 
 
