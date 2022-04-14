@@ -62,8 +62,8 @@
 .stickyBullet {
     position: absolute;
     background-color: black;
-    left: 30.5%;
+    /* left: 30.5%;
     bottom: 0%;
     width: 15%;
-    height: 15%;
-}
+    height: 15%; */
+} 

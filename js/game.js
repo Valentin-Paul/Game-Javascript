@@ -24,7 +24,10 @@ class Main {
     this.stickyPositionY = null;
     this.bullets = [];
     this.shotCounter = 0;
-    
+    this.relativeXPositions = [];
+    this.relativeYPositions = [];
+    this.positionCounter = 0;
+    this.stickyBullets = [];
   }
 
   creating(className) {
@@ -56,7 +59,7 @@ class Main {
         this.hit = true;
         this.stickToObstacle();
         
-        // this.removing(shot);
+        this.removing(shot);
         shot.xAxis = 0;
         shot.yAxis = 0;
         console.log(this.stickyPositionX);
@@ -68,16 +71,21 @@ class Main {
 
 
   shooting(bullArr) {    
-    
     bullArr.forEach((bullet)=>{
         this.shootingInterval = setInterval(() => {
+            console.log(bullet.yAxis);
             if(this.intersectRect(bullet)===true){
                 this.removing(bullet);
-                bullArr.splice(this.shotCounter,1)
-                shot.counter--
+                bullArr.splice(this.shotCounter,1);
+                this.shotCounter--;
+            }
+            else if(bullet.yAxis===100){
+              
+                this.removing(bullet);
+                this.bullets.shift();
             }
             else{
-                bullet.shoot();
+                bullet.shoot(); 
                 this.displaying(bullet)
             }
 
@@ -85,6 +93,7 @@ class Main {
     })
     
 }
+  
     // if(bullArr[this.shotCounter]){
         // console.log(this.shotCounter);
         // setInterval(() => {
@@ -136,24 +145,47 @@ class Main {
       this.bullets.push(this.shooter)
       clearInterval(this.shootingInterval);
       this.shooting(this.bullets); 
-      console.log(this.bullets[this.shotCounter]);
     }
   }
 
   stickToObstacle(){
     if(this.hit===true){
-        console.log('hit');
-        this.stickyBullet = new StickedBullet();
-        this.stickyBullet.element = this.creating('stickyBullet')
-        this.displaying(this.stickyBullet)
-        this.moveWithObstacle(this.stickyBullet) ////
-        this.displaying(this.stickyBullet) ///// in intervall packen
+       
+        this.positionCounter++;
+        const stickyBullet = new StickedBullet();
+        stickyBullet.element = this.creating('stickyBullet')
+        stickyBullet.relativePositionX = this.stickyPositionX - this.obstacle.xAxis;
+        stickyBullet.relativePositionY = this.stickyPositionY - this.obstacle.yAxis;
+        stickyBullet.xAxis = this.obstacle.xAxis + this.relativePositionX;
+        stickyBullet.yAxis = this.obstacle.yAxis + this.relativePositionY
+        this.stickyBullets.push(stickyBullet);
+
+        console.log(this.stickyBullets);
+
+        // this.relativePositions = [this.relativePositionX, this.relativePositionY]
+
+        // this.stickedBullets[`${this.stickyBullet}${this.positionCounter}`] = this.relativePositions
+        // console.log(this.stickedBullets);
+
+        // this.relativeXPositions.push(this.relativePositionX);
+        // this.relativeYPositions.push(this.relativePositionY);
+        // this.displaying(this.stickyBullet)
+
+        // setInterval(()=>{
+        //     this.moveWithObstacle(this.stickyBullet) ////
+        //     this.displaying(this.stickyBullet) ///// in intervall packen
+        
+        // },50)
     }
   }
 
-  moveWithObstacle(element){
-    element.xAxis = this.obstacle.xAxis + (element.xAxis - this.obstacle.xAxis);
-    element.yAxis = this.obstacle.yAxis + (element.yAxis - this.obstacle.yAxis);
+// moveWithObstacle(element, relPosX, relPosY){
+//     element.xAxis = this.obstacle.xAxis + relPosX;
+//     element.yAxis = this.obstacle.yAxis + relPosY;
+// }
+
+sticking(){
+    this.displaying(this);
 }
 
 
@@ -182,6 +214,25 @@ class Main {
       }
       this.displaying(this.obstacle);
 
+      this.stickyBullets.forEach((stickBull, index, object)=>{
+          stickBull.xAxis = this.obstacle.xAxis + stickBull.relativePositionX
+          stickBull.yAxis = this.obstacle.yAxis + stickBull.relativePositionY
+          this.displaying(stickBull)
+      });
+    }, 30); 
+    //   for(let key in this.stickedBullets){
+    //       if(key){
+    //       this.stickToObstacle(this.obstacle, this.stickedBullets[key][0], this.stickedBullets[key][1]);
+    //       }
+          
+    //       console.log(key, this.stickedBullets[key][0], this.stickedBullets[key][1]);
+    //     moveWithObstacle(key,this.stickedBullets[key][0], this.stickedBullets[key][1]);
+           
+    //   }
+    //   this.moveWithObstacle(this.stickyBullet)
+    //   this.displaying(this.stickyBullet) 
+
+
     //   if(this.intersectRect(this.shooter) === true){
         
     //       console.log('hit');
@@ -189,7 +240,7 @@ class Main {
     //   }
     //   this.intersectRect(this.shooter)
 
-}, 30); 
+
       
     //   if(this.intersectRect(this.shooter) === true){ 
     //       this.stickedBullet = new StickedBullet();
@@ -205,12 +256,6 @@ class Main {
     //   this.stickToObstacle(this.stickedBullet, this.obstacle);
     
   } /// end start game ///
-
-
-
-
-
-
 
   /// intervall for the shot ///
 
@@ -231,24 +276,21 @@ class Shooter extends Main{
     }
 
     shoot(){
-        if(Math.round(this.yAxis * 100) / 100 <= 100){
-            this.yAxis += 1.5;
+        if(Math.round(this.yAxis * 100) / 100 < 100){
+            this.yAxis += 2;
         }  
-        // else if(this.intersectRect(this.shooter)===true){
-        //     this.removing(this)
-        // }
-        // else{
-        //     this.removing(this)
-        // }
+         else if(Math.trunc(this.yAxis) >= 100){
+            console.log('gameover');
+         }
+        
     }  
 }
 
 
 class StickedBullet extends Main{
-    constructor(xAxis, yAxis){
-        super('stickedBullet', xAxis, yAxis,0.5, 15)
-        this.xAxis = xAxis;
-        this.yAxis = yAxis;
+    constructor(){
+        super('stickedBullet', 0, 0,0.5, 15)
+    
     }
 }
 
@@ -293,3 +335,8 @@ document.addEventListener("keydown",(event)=>{
     //     Math.round((this.obstacle.xAxis + this.obstacle.width) * 100) / 100 === 100.0) {
     //     this.obstacle.wall = "right";
     //   }
+
+
+
+
+    //   document.getElementById("gameover").innerHTML = 'game over'
