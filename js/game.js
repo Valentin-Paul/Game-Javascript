@@ -1,4 +1,3 @@
-
 class Main {
   constructor(className, xAxis, yAxis, width, height, e) {
     this.className = className;
@@ -29,9 +28,37 @@ class Main {
     this.positionCounter = 0;
     this.stickyBullets = [];
     this.colissionBullet = false;
+    this.gameCounter = 1;
     this.displayGameover = () => {
-        document.getElementById("gameover").innerHTML = 'game over'
+      document.getElementById("gameover").innerHTML = "game over";
+    };
+    this.displayNextLevel = () => {
+        this.gameCounter++;
+        document.getElementById('gameover').innerHTML = `Level ${this.gameCounter}`
     }
+    
+
+    this.deleting = () => {
+        this.shooter.element.remove();
+        this.obstacle.element.remove();
+        document.querySelectorAll('.stickyBullet').forEach(e => e.remove());
+        document.getElementById("gameover").innerHTML = "";
+        this.counterBullets = document.getElementById("counter").innerHTML = "";
+        this.displaying(this.stickyBullets);
+        this.displaying(this.counterBullets)
+    }
+  }
+
+  gameOver() {
+    this.displayGameover()
+    setTimeout(this.deleting,2000)
+    setTimeout(restarting, 2100);
+  }
+
+  nextLevel(){
+    this.displayNextLevel();
+    setTimeout(this.deleting,2000)
+    setTimeout(restarting, 2100);
   }
 
   creating(className) {
@@ -50,182 +77,166 @@ class Main {
   }
 
   removing(el) {
-      el.element.remove();
+    el.element.remove();
   }
 
   intersectRect(shot) {
-    if ( this.obstacle.xAxis < shot.xAxis + shot.width &&
-         this.obstacle.xAxis + this.obstacle.width > shot.xAxis &&
-         this.obstacle.yAxis + this.obstacle.height > shot.yAxis &&
-         this.obstacle.yAxis < shot.yAxis + shot.height ) {
-        this.stickyPositionX = shot.xAxis;
-        this.stickyPositionY = shot.yAxis
-        this.hit = true;
-        this.stickToObstacle();
-        
-        this.removing(shot);
-        shot.xAxis = 0;
-        shot.yAxis = 0;
-        // console.log(this.stickyPositionX);
-        // console.log(this.stickyPositionY);
-          
-        return this.stickyPositionX, this.stickyPositionY, this.hit, true;
+    if (
+      this.obstacle.xAxis < shot.xAxis + shot.width &&
+      this.obstacle.xAxis + this.obstacle.width > shot.xAxis &&
+      this.obstacle.yAxis + this.obstacle.height > shot.yAxis &&
+      this.obstacle.yAxis < shot.yAxis + shot.height
+    ) {
+      this.stickyPositionX = shot.xAxis;
+      this.stickyPositionY = shot.yAxis;
+      this.hit = true;
+      this.stickToObstacle();
+      this.removing(shot);
+      shot.xAxis = 0;
+      shot.yAxis = 0;
+      return this.stickyPositionX, this.stickyPositionY, this.hit, true;
     }
   }
-colissionDetectionBullets(bullStuck){
-    if (bullStuck.xAxis < this.shooter.xAxis + this.shooter.width &&
-        bullStuck.xAxis + bullStuck.width > this.shooter.xAxis &&
-        bullStuck.yAxis + bullStuck.height > this.shooter.yAxis &&
-        bullStuck.yAxis < this.shooter.yAxis + this.shooter.height ) {
-            console.log('gameover');
-            document.getElementById("gameover").innerHTML = 'game over'
-            this.colissionBullet = true;
+
+  colissionDetectionBullets(bullStuck) {
+    if (
+      bullStuck.xAxis < this.shooter.xAxis + this.shooter.width &&
+      bullStuck.xAxis + bullStuck.width > this.shooter.xAxis &&
+      bullStuck.yAxis + bullStuck.height > this.shooter.yAxis &&
+      bullStuck.yAxis < this.shooter.yAxis + this.shooter.height
+    ) {
+    this.counter = 0;
+    this.gameOver();
+    this.colissionBullet = true;
+    }
+  }
+
+  shooting(bullArr) {
+    bullArr.forEach((bullet) => {
+      this.shootingInterval = setInterval(() => {
+        if (this.intersectRect(bullet) === true) {
+          console.log(bullArr);
+          // bullArr.splice(this.shotCounter,1);
+          bullArr.shift();
+          console.log(bullArr);
+          clearInterval(this.shootingInterval);
+          this.shotCounter--;
+        } else if (bullet.yAxis === 100) {
+            this.counter = 0;
+            this.gameOver();
+          bullArr.shift();
+          clearInterval(this.shootingInterval);
+        } else if (this.colissionBullet === true) {
+          this.removing(bullet);
+        } else {
+          bullet.shoot();
+          this.displaying(bullet);
         }
-}
-  
+        console.log(bullet.yAxis);
+      }, 5);
+    });
+  }
 
+  // if(bullArr[this.shotCounter]){
+  // console.log(this.shotCounter);
+  // setInterval(() => {
+  //     console.log(this.shotCounter);
+  // if(this.intersectRect(this.shooter)===true){
+  //                 console.log('öäö');
+  //                 this.removing(bullArr[this.shotCounter]);
+  //                 bullArr.splice(this.shotCounter -1 ,1);
+  //                 this.shotCounter--;
+  //     }
 
-  shooting(bullArr) {    
-    bullArr.forEach((bullet)=>{
-        this.shootingInterval = setInterval(() => {
-            
-            if(this.intersectRect(bullet)===true){
-                console.log(bullArr);
-                // bullArr.splice(this.shotCounter,1);
-                bullArr.shift();
-                console.log(bullArr);
-                clearInterval(this.shootingInterval)
-                this.shotCounter--;
-            }
-            else if(bullet.yAxis===100){
-                document.getElementById("gameover").innerHTML = 'game over'
-                bullArr.shift();
-                clearInterval(this.shootingInterval)
+  //     else {
+  //            this.displaying(bullArr[this.shotCounter]);
+  //     bullArr[this.shotCounter].shoot();
 
-            }
-            else if(this.colissionBullet===true){
-           this.removing(bullet)
-            }
-            else{
-                bullet.shoot(); 
-                this.displaying(bullet)
-            }
-            console.log(bullet.yAxis);
-        }, 5);
-    })
-    
-}
-  
-    // if(bullArr[this.shotCounter]){
-        // console.log(this.shotCounter);
-        // setInterval(() => {
-        //     console.log(this.shotCounter);
-        // if(this.intersectRect(this.shooter)===true){
-        //                 console.log('öäö');
-        //                 this.removing(bullArr[this.shotCounter]);
-        //                 bullArr.splice(this.shotCounter -1 ,1);
-        //                 this.shotCounter--;
-        //     }
- 
-           
-            
-        //     else {
-        //            this.displaying(bullArr[this.shotCounter]);  
-        //     bullArr[this.shotCounter].shoot();
-            
-        //     }
-        //     }, 30);
-    
-    // }
+  //     }
+  //     }, 30);
 
+  // }
 
+  // for(let i = 0; i < bullArr.length; i++){
+  //     setInterval(() => {
+  //     // console.log(bullArr[i]);
+  //     bullArr[i].shoot();
+  //         this.displaying(bullArr[i]);
+  //     }, 30);
+  // }
 
-    // for(let i = 0; i < bullArr.length; i++){
-    //     setInterval(() => {
-    //     // console.log(bullArr[i]);
-    //     bullArr[i].shoot();
-    //         this.displaying(bullArr[i]);
-    //     }, 30);
-    // }
+  //  if(this.intersectRect(bullArr[i])===true)
+  //      this.bullArr.shift()
+  //      this.remove(bullet);
 
-    
-    
-            
-        //  if(this.intersectRect(bullArr[i])===true)
-        //      this.bullArr.shift() 
-        //      this.remove(bullet);
-    
-        // 
- gameOver(){
-        setTimeout(this.displayGameover, 3000)
-    };
-
+  //
 
   shootBullet(element) {
     if (element === "shoot" && this.counter > 0 && this.bullets.length === 0) {
-    this.counter--;
-     this.shotCounter++;
+      this.counter--;
+      this.shotCounter++;
       this.shooter = new Shooter();
       this.shooter.element = this.creating("bullet");
-      this.bullets.push(this.shooter)
+      this.bullets.push(this.shooter);
       clearInterval(this.shootingInterval);
-      this.shooting(this.bullets); 
+      this.shooting(this.bullets);
+    }
+    else if(this.counter === 0){
+        this.nextLevel();
     }
   }
 
-  stickToObstacle(){
-    if(this.hit===true){
-       
-        this.positionCounter++;
-        const stickyBullet = new StickedBullet();
-        stickyBullet.element = this.creating('stickyBullet')
-        stickyBullet.relativePositionX = this.stickyPositionX - this.obstacle.xAxis;
-        stickyBullet.relativePositionY = this.stickyPositionY - this.obstacle.yAxis;
-        stickyBullet.xAxis = this.obstacle.xAxis + this.relativePositionX;
-        stickyBullet.yAxis = this.obstacle.yAxis + this.relativePositionY
-        this.stickyBullets.push(stickyBullet);
+  stickToObstacle() {
+    if (this.hit === true) {
+      this.positionCounter++;
+      const stickyBullet = new StickedBullet();
+      stickyBullet.element = this.creating("stickyBullet");
+      stickyBullet.relativePositionX =
+        this.stickyPositionX - this.obstacle.xAxis;
+      stickyBullet.relativePositionY =
+        this.stickyPositionY - this.obstacle.yAxis;
+      stickyBullet.xAxis = this.obstacle.xAxis + this.relativePositionX;
+      stickyBullet.yAxis = this.obstacle.yAxis + this.relativePositionY;
+      this.stickyBullets.push(stickyBullet);
 
-        // console.log(this.stickyBullets);
+      // console.log(this.stickyBullets);
 
-        // this.relativePositions = [this.relativePositionX, this.relativePositionY]
+      // this.relativePositions = [this.relativePositionX, this.relativePositionY]
 
-        // this.stickedBullets[`${this.stickyBullet}${this.positionCounter}`] = this.relativePositions
-        // console.log(this.stickedBullets);
+      // this.stickedBullets[`${this.stickyBullet}${this.positionCounter}`] = this.relativePositions
+      // console.log(this.stickedBullets);
 
-        // this.relativeXPositions.push(this.relativePositionX);
-        // this.relativeYPositions.push(this.relativePositionY);
-        // this.displaying(this.stickyBullet)
+      // this.relativeXPositions.push(this.relativePositionX);
+      // this.relativeYPositions.push(this.relativePositionY);
+      // this.displaying(this.stickyBullet)
 
-        // setInterval(()=>{
-        //     this.moveWithObstacle(this.stickyBullet) ////
-        //     this.displaying(this.stickyBullet) ///// in intervall packen
-        
-        // },50)
+      // setInterval(()=>{
+      //     this.moveWithObstacle(this.stickyBullet) ////
+      //     this.displaying(this.stickyBullet) ///// in intervall packen
+
+      // },50)
     }
   }
 
-// moveWithObstacle(element, relPosX, relPosY){
-//     element.xAxis = this.obstacle.xAxis + relPosX;
-//     element.yAxis = this.obstacle.yAxis + relPosY;
-// }
+  // moveWithObstacle(element, relPosX, relPosY){
+  //     element.xAxis = this.obstacle.xAxis + relPosX;
+  //     element.yAxis = this.obstacle.yAxis + relPosY;
+  // }
 
-sticking(){
+  sticking() {
     this.displaying(this);
-}
-
+  }
 
   startGame() {
-   
-    this.gameOver();
+
     /// obstacle ///
     this.obstacle = new Obstacle();
     this.obstacle.element = this.creating("obstacle");
     this.displaying(this.obstacle);
-    
-    setInterval(() => {
-        /// counter ///
-    document.getElementById("counter").innerHTML = `Shots: ${this.counter}`;
 
+    setInterval(() => {
+      /// counter ///
+      this.counterBullets = document.getElementById("counter").innerHTML = `Shots: ${this.counter}`;
 
       if (this.obstacle.xAxis === 0) {
         this.obstacle.wall = "left";
@@ -239,37 +250,33 @@ sticking(){
       }
       this.displaying(this.obstacle);
 
-      this.stickyBullets.forEach((stickBull)=>{
+      this.stickyBullets.forEach((stickBull) => {
         this.colissionDetectionBullets(stickBull);
-          stickBull.xAxis = this.obstacle.xAxis + stickBull.relativePositionX
-          stickBull.yAxis = this.obstacle.yAxis + stickBull.relativePositionY
-          this.displaying(stickBull)
-          
+        stickBull.xAxis = this.obstacle.xAxis + stickBull.relativePositionX;
+        stickBull.yAxis = this.obstacle.yAxis + stickBull.relativePositionY;
+        this.displaying(stickBull);
       });
-    }, 30); 
+    }, 50);
     //   for(let key in this.stickedBullets){
     //       if(key){
     //       this.stickToObstacle(this.obstacle, this.stickedBullets[key][0], this.stickedBullets[key][1]);
     //       }
-          
+
     //       console.log(key, this.stickedBullets[key][0], this.stickedBullets[key][1]);
     //     moveWithObstacle(key,this.stickedBullets[key][0], this.stickedBullets[key][1]);
-           
+
     //   }
     //   this.moveWithObstacle(this.stickyBullet)
-    //   this.displaying(this.stickyBullet) 
-
+    //   this.displaying(this.stickyBullet)
 
     //   if(this.intersectRect(this.shooter) === true){
-        
+
     //       console.log('hit');
     //       this.removing(this.shooter)
     //   }
     //   this.intersectRect(this.shooter)
 
-
-      
-    //   if(this.intersectRect(this.shooter) === true){ 
+    //   if(this.intersectRect(this.shooter) === true){
     //       this.stickedBullet = new StickedBullet();
     //       this.stickedBullet.element = this.creating("stickedBullet");
     //         this.stickedBullet.xAxis = this.stickyPositionX;
@@ -281,60 +288,74 @@ sticking(){
     //   }
     //   this.displaying(this.stickedBullet);
     //   this.stickToObstacle(this.stickedBullet, this.obstacle);
-    
   } /// end start game ///
 
   /// intervall for the shot ///
-
 } /// end class Main ///
 
 ///// Obstacle-Clas //////
-class Obstacle extends Main{
-    constructor(){
-        super('obstacle', 0, 75, 18, 2,)
-        this.wall = null;
-    }
+class Obstacle extends Main {
+  constructor() {
+    super("obstacle", 0, 75, 18, 2);
+    this.wall = null;
+  }
 }
 
 //// Shooter-Class/////
-class Shooter extends Main{
-    constructor(){
-        super('shooter', 50, 0, 0.5, 15);
-    }
+class Shooter extends Main {
+  constructor() {
+    super("shooter", 50, 0, 0.5, 15);
+  }
 
-    shoot(){
-        if(Math.round(this.yAxis * 100) / 100 < 100){
-            this.yAxis += 2;
-        }  
-         else if(Math.trunc(this.yAxis) >= 100){
-            console.log('gameover');
-         }
-        
-    }  
+  shoot() {
+    if (Math.round(this.yAxis * 100) / 100 < 100) {
+      this.yAxis += 2;
+    } 
+    // else if (Math.trunc(this.yAxis) >= 100) {
+    //   console.log("gameover");
+    // }
+  }
 }
 
-
-class StickedBullet extends Main{
-    constructor(){
-        super('stickedBullet', 0, 0,0.5, 15)
-    
-    }
+class StickedBullet extends Main {
+  constructor() {
+    super("stickedBullet", 0, 0, 0.5, 15);
+  }
+  
 }
 
+class Gameover extends Main {
+  constructor() {
+    super("gameover", 35, 45, 30, 10);
+  }
+}
 
-
-///// start game /////
-const play = new Main();
+let play = new Main();
 play.startGame();
 
+let restart = document.getElementById('game');
+
+
+
+const restarting = function restarting(){
+    play = new Main();
+    play.startGame();
+}
+
+// this.restart = play.remove();
+
+// let game = document.getElementById("game");
+// let newDiv = document.createElement("div");
+// newDiv.className = className;
+// game.appendChild(newDiv);
+// return newDiv;
+
 /// shoot on spacebar ///
-document.addEventListener("keydown",(event)=>{
-    if(event.code === 'Space') {
-        play.shootBullet('shoot');
-    }
+document.addEventListener("keydown", (event) => {
+  if (event.code === "Space") {
+    play.shootBullet("shoot");
+  }
 });
-
-
 
 //// storage ////
 // setInterval(() => {
@@ -354,19 +375,15 @@ document.addEventListener("keydown",(event)=>{
 
 // }, 50);
 
-
 //// rounded ////
-  //   if (Math.round(this.obstacle.xAxis * 100) / 100 === 0) {
-    //     this.obstacle.wall = "left";
-    //   } else if (
-    //     Math.round((this.obstacle.xAxis + this.obstacle.width) * 100) / 100 === 100.0) {
-    //     this.obstacle.wall = "right";
-    //   }
+//   if (Math.round(this.obstacle.xAxis * 100) / 100 === 0) {
+//     this.obstacle.wall = "left";
+//   } else if (
+//     Math.round((this.obstacle.xAxis + this.obstacle.width) * 100) / 100 === 100.0) {
+//     this.obstacle.wall = "right";
+//   }
 
-
-
-
-    //   document.getElementById("gameover").innerHTML = 'game over'
-     //   if(this.shooter.yAxis>= 100){
-    //     document.getElementById("gameover").innerHTML = 'game over'
-    //   }
+//   document.getElementById("gameover").innerHTML = 'game over'
+//   if(this.shooter.yAxis>= 100){
+//     document.getElementById("gameover").innerHTML = 'game over'
+//   }
