@@ -225,7 +225,7 @@ class Main {
 ///// Obstacle-Clas //////
 class Obstacle extends Main {
   constructor() {
-    super("obstacle", 0, 75, 25, 2);
+    super("obstacle", 0, 75, 30, 2);
     this.wall = null;
   }
 }
