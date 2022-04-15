@@ -1,5 +1,5 @@
 class Main {
-  constructor(className, xAxis, yAxis, width, height, e) {
+    constructor(className, xAxis, yAxis, width, height, e) {
     this.className = className;
     this.xAxis = xAxis;
     this.yAxis = yAxis;
@@ -11,12 +11,12 @@ class Main {
     this.shooter = null;
     this.wall = null;
     this.moveObstacleRight = () => {
-      this.xAxis += 0.5;
+      this.xAxis += 0.25;
     };
     this.moveObstacleLeft = () => {
-      this.xAxis -= 0.5;
+      this.xAxis -= 0.25;
     };
-    this.counter = 8;
+    this.counter = counter;
     this.gameover = false;
     this.hit = false;
     this.stickyPositionX = null;
@@ -28,37 +28,41 @@ class Main {
     this.positionCounter = 0;
     this.stickyBullets = [];
     this.colissionBullet = false;
-    this.gameCounter = 1;
+    this.counterBullets = document.getElementById("counter")
     this.displayGameover = () => {
       document.getElementById("gameover").innerHTML = "game over";
     };
     this.displayNextLevel = () => {
-        this.gameCounter++;
-        document.getElementById('gameover').innerHTML = `Level ${this.gameCounter}`
-    }
-    
-
+        document.getElementById('gameover').innerHTML = `Level ${gameCounter}`
+    };
+    this.blockingShooting = false;
     this.deleting = () => {
         this.shooter.element.remove();
         this.obstacle.element.remove();
         document.querySelectorAll('.stickyBullet').forEach(e => e.remove());
+
         document.getElementById("gameover").innerHTML = "";
-        this.counterBullets = document.getElementById("counter").innerHTML = "";
+        this.counterBullets.innerHTML = "";
+        //this.counterBullets.remove()
         this.displaying(this.stickyBullets);
-        this.displaying(this.counterBullets)
+        // this.displaying(this.counterBullets)
     }
   }
 
   gameOver() {
     this.displayGameover()
     setTimeout(this.deleting,2000)
-    setTimeout(restarting, 2100);
+    setTimeout(restartingGameover, 2100);
+    this.blockingShooting = true;
   }
 
   nextLevel(){
     this.displayNextLevel();
+    increasing();
     setTimeout(this.deleting,2000)
-    setTimeout(restarting, 2100);
+    setTimeout(restartingNextLevel, 2100);
+    this.blockingShooting = true;
+    // this.counterBullets.innerHTML = `Shots: ${this.counter}`;
   }
 
   creating(className) {
@@ -116,7 +120,6 @@ class Main {
       this.shootingInterval = setInterval(() => {
         if (this.intersectRect(bullet) === true) {
           console.log(bullArr);
-          // bullArr.splice(this.shotCounter,1);
           bullArr.shift();
           console.log(bullArr);
           clearInterval(this.shootingInterval);
@@ -137,43 +140,11 @@ class Main {
     });
   }
 
-  // if(bullArr[this.shotCounter]){
-  // console.log(this.shotCounter);
-  // setInterval(() => {
-  //     console.log(this.shotCounter);
-  // if(this.intersectRect(this.shooter)===true){
-  //                 console.log('öäö');
-  //                 this.removing(bullArr[this.shotCounter]);
-  //                 bullArr.splice(this.shotCounter -1 ,1);
-  //                 this.shotCounter--;
-  //     }
-
-  //     else {
-  //            this.displaying(bullArr[this.shotCounter]);
-  //     bullArr[this.shotCounter].shoot();
-
-  //     }
-  //     }, 30);
-
-  // }
-
-  // for(let i = 0; i < bullArr.length; i++){
-  //     setInterval(() => {
-  //     // console.log(bullArr[i]);
-  //     bullArr[i].shoot();
-  //         this.displaying(bullArr[i]);
-  //     }, 30);
-  // }
-
-  //  if(this.intersectRect(bullArr[i])===true)
-  //      this.bullArr.shift()
-  //      this.remove(bullet);
-
-  //
 
   shootBullet(element) {
-    if (element === "shoot" && this.counter > 0 && this.bullets.length === 0) {
+    if (element === "shoot" && this.counter > 0 && this.bullets.length === 0 && this.blockingShooting === false ) {
       this.counter--;
+      this.counterBullets.innerHTML = `Shots: ${this.counter}`; //update UI
       this.shotCounter++;
       this.shooter = new Shooter();
       this.shooter.element = this.creating("bullet");
@@ -181,8 +152,11 @@ class Main {
       clearInterval(this.shootingInterval);
       this.shooting(this.bullets);
     }
-    else if(this.counter === 0){
+    else if(this.counter === 0 && this.blockingShooting === false){
         this.nextLevel();
+    }
+    else if (this.blockingShooting === true){
+
     }
   }
 
@@ -199,29 +173,10 @@ class Main {
       stickyBullet.yAxis = this.obstacle.yAxis + this.relativePositionY;
       this.stickyBullets.push(stickyBullet);
 
-      // console.log(this.stickyBullets);
 
-      // this.relativePositions = [this.relativePositionX, this.relativePositionY]
-
-      // this.stickedBullets[`${this.stickyBullet}${this.positionCounter}`] = this.relativePositions
-      // console.log(this.stickedBullets);
-
-      // this.relativeXPositions.push(this.relativePositionX);
-      // this.relativeYPositions.push(this.relativePositionY);
-      // this.displaying(this.stickyBullet)
-
-      // setInterval(()=>{
-      //     this.moveWithObstacle(this.stickyBullet) ////
-      //     this.displaying(this.stickyBullet) ///// in intervall packen
-
-      // },50)
     }
   }
 
-  // moveWithObstacle(element, relPosX, relPosY){
-  //     element.xAxis = this.obstacle.xAxis + relPosX;
-  //     element.yAxis = this.obstacle.yAxis + relPosY;
-  // }
 
   sticking() {
     this.displaying(this);
@@ -233,10 +188,10 @@ class Main {
     this.obstacle = new Obstacle();
     this.obstacle.element = this.creating("obstacle");
     this.displaying(this.obstacle);
+    this.counterBullets.innerHTML = `Shots: ${this.counter}`;
 
     setInterval(() => {
       /// counter ///
-      this.counterBullets = document.getElementById("counter").innerHTML = `Shots: ${this.counter}`;
 
       if (this.obstacle.xAxis === 0) {
         this.obstacle.wall = "left";
@@ -256,47 +211,21 @@ class Main {
         stickBull.yAxis = this.obstacle.yAxis + stickBull.relativePositionY;
         this.displaying(stickBull);
       });
-    }, 50);
-    //   for(let key in this.stickedBullets){
-    //       if(key){
-    //       this.stickToObstacle(this.obstacle, this.stickedBullets[key][0], this.stickedBullets[key][1]);
-    //       }
+    }, 10);
 
-    //       console.log(key, this.stickedBullets[key][0], this.stickedBullets[key][1]);
-    //     moveWithObstacle(key,this.stickedBullets[key][0], this.stickedBullets[key][1]);
-
-    //   }
-    //   this.moveWithObstacle(this.stickyBullet)
-    //   this.displaying(this.stickyBullet)
-
-    //   if(this.intersectRect(this.shooter) === true){
-
-    //       console.log('hit');
-    //       this.removing(this.shooter)
-    //   }
-    //   this.intersectRect(this.shooter)
-
-    //   if(this.intersectRect(this.shooter) === true){
-    //       this.stickedBullet = new StickedBullet();
-    //       this.stickedBullet.element = this.creating("stickedBullet");
-    //         this.stickedBullet.xAxis = this.stickyPositionX;
-    //         this.stickedBullet.yAxis = this.stickyPositionY;
-    //         this.removing(this.shooter);
-    //         console.log('hello');
-    //         this.hit = false;
-    //         return this.hit;
-    //   }
-    //   this.displaying(this.stickedBullet);
-    //   this.stickToObstacle(this.stickedBullet, this.obstacle);
   } /// end start game ///
 
-  /// intervall for the shot ///
 } /// end class Main ///
+
+
+
+
+
 
 ///// Obstacle-Clas //////
 class Obstacle extends Main {
   constructor() {
-    super("obstacle", 0, 75, 18, 2);
+    super("obstacle", 0, 75, 25, 2);
     this.wall = null;
   }
 }
@@ -317,6 +246,8 @@ class Shooter extends Main {
   }
 }
 
+
+//// StickedBullet-Class ////
 class StickedBullet extends Main {
   constructor() {
     super("stickedBullet", 0, 0, 0.5, 15);
@@ -324,66 +255,37 @@ class StickedBullet extends Main {
   
 }
 
-class Gameover extends Main {
-  constructor() {
-    super("gameover", 35, 45, 30, 10);
-  }
-}
+
+
+////////////////
+
+
+let gameCounter = 2;
+let counter = 4;
+
 
 let play = new Main();
 play.startGame();
 
-let restart = document.getElementById('game');
+function increasing(){
+    gameCounter++;
+    counter += 2;
+    play.counter = counter;
+} 
 
-
-
-const restarting = function restarting(){
-    play = new Main();
-    play.startGame();
+const restartingGameover = function restarting(){
+    location.reload()
 }
 
-// this.restart = play.remove();
+const restartingNextLevel = function restartingNextLevel(){
+play = new Main();
+play.startGame();
+}
 
-// let game = document.getElementById("game");
-// let newDiv = document.createElement("div");
-// newDiv.className = className;
-// game.appendChild(newDiv);
-// return newDiv;
-
-/// shoot on spacebar ///
 document.addEventListener("keydown", (event) => {
   if (event.code === "Space") {
     play.shootBullet("shoot");
   }
 });
 
-//// storage ////
-// setInterval(() => {
-// if (this.obstacle.xAxis  === 0){
-//     this.obstacle.wall = 'left'
-// }
-// else if((this.obstacle.xAxis + this.obstacle.width) === 100){
-//     this.obstacle.wall = "right";
-// }
 
-//   if (this.obstacle.wall === "left") {
-//     this.obstacle.moveObstacleRight();
-//   } else if (this.obstacle.wall === "right") {
-//     this.obstacle.moveObstacleLeft();
-//   }
-//   this.displaying(this.obstacle);
-
-// }, 50);
-
-//// rounded ////
-//   if (Math.round(this.obstacle.xAxis * 100) / 100 === 0) {
-//     this.obstacle.wall = "left";
-//   } else if (
-//     Math.round((this.obstacle.xAxis + this.obstacle.width) * 100) / 100 === 100.0) {
-//     this.obstacle.wall = "right";
-//   }
-
-//   document.getElementById("gameover").innerHTML = 'game over'
-//   if(this.shooter.yAxis>= 100){
-//     document.getElementById("gameover").innerHTML = 'game over'
-//   }
